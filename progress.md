@@ -16,3 +16,23 @@
 + 安装Edraw软件进行画图
 + 查看DenseLayer生成的.fir代码，并将neuron生成的结点数手动画图
 + 印象笔记进行思维导图绘制
+
+## 2.14,2.15
+
+情人节，去过节了，没有任何进展
+
+## 2.16
+
++ `model.save('path_to_model.h5')`,`model.load('path_to_model.h5')`储存和加载训练好的模型
++ 用vscode写juypter notebook啦
++ 将权重导入到csv里面去，针对有空行的问题,有如下的解决方案
+  
+```python
+f_out = open( fname, "w" ,newline='')#newline = ''
+wrt = csv.writer( f_out )
+wrt.writerow( "some thing" )
+f_out.close()
+```
+
++ 理解tensor shape,以及layer input shape中(None,28,28)的概念。None在训练时用来表示batch
+
