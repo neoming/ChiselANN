@@ -36,3 +36,8 @@ f_out.close()
 
 + 理解tensor shape,以及layer input shape中(None,28,28)的概念。None在训练时用来表示batch
 
+## 2.17
+
++ 使用scala生成Denselayer，但是由于784\*30的全连接层参数过大导致仿真的时候stackoverflow。可以正常模拟30\*10的,栈不会溢出
++ 明日计划：自己搭建Python的神经网络进行计算，然后验证30*10的正确性
++ 安装modelsim，实在不行就通过.v进行验证吧=-=
