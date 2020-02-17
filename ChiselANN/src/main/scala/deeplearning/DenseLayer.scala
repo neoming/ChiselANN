@@ -2,7 +2,6 @@
 package deeplearning
 
 import chisel3._
-import chisel3.util.Decoupled
 
 class DenseLayer (
   dtype : SInt,//input data type

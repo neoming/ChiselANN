@@ -18,7 +18,8 @@ class DenseLayerTester(c : DenseLayer) extends PeekPokeTester(c){
   poke(c.io.dataIn(1),img(0)(1))
   poke(c.io.dataIn(2),img(1)(0))
   poke(c.io.dataIn(3),img(1)(1))
-  peek(c.io.dataOut)
+  step(2)
+  print(peek(c.io.dataOut))
 }
 
 object Runner extends App{
