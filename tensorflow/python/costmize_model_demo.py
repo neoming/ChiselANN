@@ -1,3 +1,5 @@
+# tutorial from tensorflow , is about to costmize the model
+
 import tensorflow as tf
 import numpy as np
 import sys

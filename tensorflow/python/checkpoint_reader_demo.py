@@ -1,3 +1,5 @@
+# a tensorflow ChickPointReader 
+
 import os
 import re
 import tensorflow as tf
