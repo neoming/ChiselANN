@@ -3,28 +3,8 @@ package deeplearning
 
 import chisel3._
 import chisel3.iotesters.{Driver, PeekPokeTester}
-import com.github.tototoshi.csv._
-
-import java.io.File
 
 object DenseLayerSuit extends App{
-  val fracBits = 4
-  val src_path = "src/main/resources/"
-
-  def getWeights(fname: String, dtype:SInt):Seq[Seq[SInt]] = {
-    val weights = TestTools.getTwoDimArryAsSInt(src_path + fname,fracBits,dtype)
-    weights
-  }
-
-  def getBias(fname: String, dtype:SInt):Seq[SInt] = {
-    val bias = TestTools.getOneDimArryAsSInt(src_path + fname,fracBits,dtype )
-    bias
-  }
-
-  def getInput(fname: String, dtype:SInt):Seq[SInt] = {
-    val input = TestTools.getOneDimArryAsSInt(src_path + fname,fracBits,dtype)
-    input
-  }
 
   def runDenseTester(
     wfname:String,//weights file name
@@ -35,8 +15,8 @@ object DenseLayerSuit extends App{
     inNo:Int,
     outNo:Int
   ) : Boolean = {
-    val weights = getWeights(wfname,dtype)
-    val bias = getBias(bfname,dtype)
+    val weights = TestTools.getTwoDimArryAsSInt(wfname,dtype)
+    val bias = TestTools.getOneDimArryAsSInt(bfname,dtype)
     //print(chisel3.Driver.emitVerilog(new DenseLayer(dtype,inNo,outNo,bias,weights))
     Driver(() =>new DenseLayer(dtype,inNo,outNo,bias,weights)){
       d => new DenseLayerTester(d,ifname,rfname,dtype)
@@ -44,11 +24,11 @@ object DenseLayerSuit extends App{
   }
 
   class DenseLayerTester(c : DenseLayer,ifname:String,rfname:String,dtype:SInt) extends PeekPokeTester(c){
-    val inputs = getInput(ifname,dtype)//getInput
+    val inputs: Seq[SInt] = TestTools.getOneDimArryAsSInt(ifname,dtype)
     for( i <- inputs.indices ){
       poke(c.io.dataIn(i),inputs(i))
     }
-    TestTools.writeRowToCsv(peek(c.io.dataOut).toList,src_path + rfname)//write result
+    TestTools.writeRowToCsv(peek(c.io.dataOut).toList, rfname)//write result
   }
 
   def main():Unit = {
