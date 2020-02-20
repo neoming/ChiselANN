@@ -12,14 +12,14 @@ class DenseLayer (
 ) extends Module{
 
   val io = IO(new Bundle() {
-    val dataIn =  Input(Vec( inNo, dtype ))
-    val dataOut =  Output(Vec( outNo, dtype ))
+    val dataIn =  Input(Vec( inNo, dtype))
+    val dataOut =  Output(Vec( outNo, dtype))
   })
 
   val ReLU: SInt => SInt = x => Mux(x >= 0.S, x, 0.S)
   val No: SInt => SInt = x => x
   for(i <- 0 until outNo){
-    val neuron = Module(new Neuron(dtype , inNo , No,bias(i)))
+    val neuron = Module(new Neuron(dtype , inNo , ReLU ,bias(i),false))
     neuron.io.in <> io.dataIn
     neuron.io.weights <> weights(i)
     neuron.io.bias := bias(i)

@@ -7,89 +7,57 @@ import com.github.tototoshi.csv._
 
 import java.io.File
 
-class DenseLayerTester(c : DenseLayer) extends PeekPokeTester(c){
-  val fracBits = 12
+object DenseLayerSuit extends App{
+  val fracBits = 4
+  val src_path = "src/main/resources/"
 
-  //get img
-  val buffer_img = scala.io.Source.fromFile("src/main/resources/dense_output_7.csv")
-  val img_raw = buffer_img.getLines().toList
-  val img = img_raw(0).split(",").toList.map( x => {
-    BigInt(math.round( x.toFloat * (1 << fracBits)).toInt)
-  }).map( x => x.asSInt(20.W))
-
-  for( i <- 0 until 29 ){
-    poke(c.io.dataIn(i),img(i))
+  def getWeights(fname: String, dtype:SInt):Seq[Seq[SInt]] = {
+    val weights = TestTools.getTwoDimArryAsSInt(src_path + fname,fracBits,dtype)
+    weights
   }
-  /*val f = new File("test_dense_output_7.csv")
-  val writer = CSVWriter.open(f)
-  writer.writeRow(peek(c.io.dataOut).toList)*/
-}
 
-object DenseRunner extends App{
-  val fracBits = 12
-
-  //get weights
-  val buffer_weights = scala.io.Source.fromFile("src/main/resources/dense_weights.csv")
-  val weights_raw = buffer_weights.getLines().toList
-  val weights = weights_raw.map(_.split(",").toList.map(x => {
-    BigInt(math.round( x.toFloat * ( 1 << fracBits ) ).toInt)
-  }).map( x => x.asSInt(20.W))).transpose
-
-  //get bias
-  val buffer_bias = scala.io.Source.fromFile("src/main/resources/dense_weights_bias.csv")
-  val bias_raw = buffer_bias.getLines().toList
-  val bias = bias_raw(0).split(",").toList.map(x => {
-    BigInt(math.round( x.toFloat * ( 1 << fracBits)).toInt)
-  }).map( x => x.asSInt(20.W))
-
-  //get img
-  //get img
-  val buffer_img = scala.io.Source.fromFile("src/main/resources/flatten_output_0.csv")
-  val img_raw = buffer_img.getLines().toList
-  val img = img_raw(0).split(",").toList.map( x => {
-    BigInt(math.round( x.toFloat * (1 << fracBits)).toInt)
-  }).map( x => x.asSInt(20.W))
-
-  println(img)
-  println(weights)
-  println(bias)
-
-  print(chisel3.Driver.emitVerilog(new DenseLayer(SInt(20.W),784,30,bias,weights)))
-  Driver(() =>new DenseLayer(SInt(20.W),784,30,bias,weights)){
-    d => new DenseLayerTester(d)
+  def getBias(fname: String, dtype:SInt):Seq[SInt] = {
+    val bias = TestTools.getOneDimArryAsSInt(src_path + fname,fracBits,dtype )
+    bias
   }
-}
 
-object Dense1Runner extends App{
-  val fracBits = 12
-
-  //get weights
-  val buffer_weights = scala.io.Source.fromFile("src/main/resources/dense1_weights.csv")
-  val weights_raw = buffer_weights.getLines().toList
-  val weights = weights_raw.map(_.split(",").toList.map(x => {
-    BigInt(math.round( x.toFloat * ( 1 << fracBits ) ).toInt)
-  }).map( x => x.asSInt(20.W))).transpose
-
-  //get bias
-  val buffer_bias = scala.io.Source.fromFile("src/main/resources/dense1_weights_bias.csv")
-  val bias_raw = buffer_bias.getLines().toList
-  val bias = bias_raw(0).split(",").toList.map(x => {
-    BigInt(math.round( x.toFloat * ( 1 << fracBits)).toInt)
-  }).map( x => x.asSInt(20.W))
-
-  //get img
-  //get img
-  val buffer_img = scala.io.Source.fromFile("src/main/resources/dense_output_7.csv")
-  val img_raw = buffer_img.getLines().toList
-  val img = img_raw(0).split(",").toList.map( x => {
-    BigInt(math.round( x.toFloat * (1 << fracBits)).toInt)
-  }).map( x => x.asSInt(20.W))
-
-  println(img)
-  println(weights)
-  println(bias)
-
-  Driver(() =>new DenseLayer(SInt(20.W),30,10,bias,weights)){
-      d => new DenseLayerTester(d)
+  def getInput(fname: String, dtype:SInt):Seq[SInt] = {
+    val input = TestTools.getOneDimArryAsSInt(src_path + fname,fracBits,dtype)
+    input
   }
+
+  def runDenseTester(
+    wfname:String,//weights file name
+    bfname:String,//bias file name
+    ifname:String,//input file name
+    rfname:String,//test result file name
+    dtype:SInt,
+    inNo:Int,
+    outNo:Int
+  ) : Boolean = {
+    val weights = getWeights(wfname,dtype)
+    val bias = getBias(bfname,dtype)
+    //print(chisel3.Driver.emitVerilog(new DenseLayer(dtype,inNo,outNo,bias,weights))
+    Driver(() =>new DenseLayer(dtype,inNo,outNo,bias,weights)){
+      d => new DenseLayerTester(d,ifname,rfname,dtype)
+    }
+  }
+
+  class DenseLayerTester(c : DenseLayer,ifname:String,rfname:String,dtype:SInt) extends PeekPokeTester(c){
+    val inputs = getInput(ifname,dtype)//getInput
+    for( i <- inputs.indices ){
+      poke(c.io.dataIn(i),inputs(i))
+    }
+    TestTools.writeRowToCsv(peek(c.io.dataOut).toList,src_path + rfname)//write result
+  }
+
+  def main():Unit = {
+    val weights_file_name = "dense1_weights.csv"
+    val bias_file_name = "dense1_weights_bias.csv"
+    val input_file_name = "dense_output_0.csv"
+    val result_file_name = "test_dense1_output_0.csv"
+    runDenseTester(weights_file_name,bias_file_name,input_file_name,result_file_name,SInt(16.W),30,10)
+  }
+
+  main()
 }
