@@ -28,10 +28,11 @@ object DenseLayerSuit extends App{
     for( i <- inputs.indices ){
       poke(c.io.dataIn(i),inputs(i))
     }
+    step(c.latency)
     TestTools.writeRowToCsv(peek(c.io.dataOut).toList, rfname)//write result
   }
 
-  def main():Unit = {
+  def testDense1():Unit = {
     val weights_file_name = "dense1_weights.csv"
     val bias_file_name = "dense1_weights_bias.csv"
     val input_file_name = "dense_output_0.csv"
@@ -39,5 +40,13 @@ object DenseLayerSuit extends App{
     runDenseTester(weights_file_name,bias_file_name,input_file_name,result_file_name,SInt(16.W),30,10)
   }
 
-  main()
+  def testDense():Unit = {
+    val weights_file_name = "dense_weights.csv"
+    val bias_file_name = "dense_weights_bias.csv"
+    val input_file_name = "flatten_output_0.csv"
+    val result_file_name = "test_dense_output_0.csv"
+    runDenseTester(weights_file_name,bias_file_name,input_file_name,result_file_name,SInt(16.W),784,30)
+  }
+
+  testDense()
 }

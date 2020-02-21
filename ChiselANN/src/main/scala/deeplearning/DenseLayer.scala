@@ -2,6 +2,7 @@
 package deeplearning
 
 import chisel3._
+import chisel3.util.log2Ceil
 
 class DenseLayer (
   dtype : SInt,//input data type
@@ -16,13 +17,14 @@ class DenseLayer (
     val dataOut =  Output(Vec( outNo, dtype))
   })
 
-  val ReLU: SInt => SInt = x => Mux(x >= 0.S, x, 0.S)
-  val No: SInt => SInt = x => x
-  for(i <- 0 until outNo){
-    val neuron = Module(new Neuron(dtype , inNo , ReLU ,bias(i),false))
+  val neurons: List[Neuron] = ( 0 until outNo).map(i =>{
+    val neuron = Module(new Neuron(dtype , inNo ,bias(i),false))
     neuron.io.in <> io.dataIn
     neuron.io.weights <> weights(i)
     neuron.io.bias := bias(i)
-    io.dataOut(i) := neuron.io.out
-  }
+    io.dataOut(i) := neuron.io.act
+    neuron
+  }).toList
+
+  val latency: Int = neurons.head.mac_latency + neurons.head.act_latency
 }

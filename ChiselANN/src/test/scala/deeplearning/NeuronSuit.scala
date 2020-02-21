@@ -15,9 +15,8 @@ object NeuronSuit extends App{
     inNo:Int,
     ) : Boolean = {
     val bias = TestTools.getOneDimArryAsSInt(bfname,dtype)
-    val ReLU: SInt => SInt = x => Mux(x >= 0.S, x, 0.S)
     //chisel3.Driver.emitVerilog(new DenseLayer(dtype,inNo,outNo,bias,weights)
-    Driver(() =>new Neuron(SInt(16.W),inNo,ReLU,bias.head,true)){
+    Driver(() =>new Neuron(SInt(16.W),inNo,bias.head,true)){
       n => new NeuronDebugTester(n,wfname,ifname,rfname,dtype)
     }
   }
@@ -34,10 +33,10 @@ object NeuronSuit extends App{
       poke(c.io.in(i),input(i))
     }
 
-    step(c.latency)
+    step(c.mac_latency + c.act_latency)
     print(peek(c.io.mul_res.get))
-    print(peek(c.io.out) + "\n")
-    expect(c.io.out,output)
+    print(peek(c.io.act) + "\n")
+    expect(c.io.act,output)
   }
 
   def main():Unit = {
