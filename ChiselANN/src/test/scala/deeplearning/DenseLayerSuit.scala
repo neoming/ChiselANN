@@ -13,12 +13,13 @@ object DenseLayerSuit extends App{
     rfname:String,//test result file name
     dtype:SInt,
     inNo:Int,
-    outNo:Int
+    outNo:Int,
+    frac_bit:Int,
   ) : Boolean = {
     val weights = TestTools.getTwoDimArryAsSInt(wfname,dtype)
     val bias = TestTools.getOneDimArryAsSInt(bfname,dtype)
     //print(chisel3.Driver.emitVerilog(new DenseLayer(dtype,inNo,outNo,bias,weights))
-    Driver(() =>new DenseLayer(dtype,inNo,outNo,bias,weights)){
+    Driver(() =>new DenseLayer(dtype,inNo,outNo,bias,weights,frac_bit)){
       d => new DenseLayerTester(d,ifname,rfname,dtype)
     }
   }
@@ -37,7 +38,7 @@ object DenseLayerSuit extends App{
     val bias_file_name = "dense1_weights_bias.csv"
     val input_file_name = "dense_output_0.csv"
     val result_file_name = "test_dense1_output_0.csv"
-    runDenseTester(weights_file_name,bias_file_name,input_file_name,result_file_name,SInt(16.W),30,10)
+    runDenseTester(weights_file_name,bias_file_name,input_file_name,result_file_name,SInt(16.W),30,10,4)
   }
 
   def testDense():Unit = {
@@ -45,7 +46,7 @@ object DenseLayerSuit extends App{
     val bias_file_name = "dense_weights_bias.csv"
     val input_file_name = "flatten_output_0.csv"
     val result_file_name = "test_dense_output_0.csv"
-    runDenseTester(weights_file_name,bias_file_name,input_file_name,result_file_name,SInt(16.W),784,30)
+    runDenseTester(weights_file_name,bias_file_name,input_file_name,result_file_name,SInt(16.W),784,30,4)
   }
 
   testDense()

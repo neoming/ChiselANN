@@ -10,6 +10,7 @@ class DenseLayer (
   outNo : Int,//output Number
   bias : Seq[SInt],//length equal to output Number
   weights : Seq[Seq[SInt]],//[outNo][inNo]
+  frac_bits : Int = 0,//frac_bits
 ) extends Module{
 
   val io = IO(new Bundle() {
@@ -18,7 +19,7 @@ class DenseLayer (
   })
 
   val neurons: List[Neuron] = ( 0 until outNo).map(i =>{
-    val neuron = Module(new Neuron(dtype , inNo ,bias(i),false))
+    val neuron = Module(new Neuron(dtype , inNo ,bias(i),false,frac_bits))
     neuron.io.in <> io.dataIn
     neuron.io.weights <> weights(i)
     neuron.io.bias := bias(i)
