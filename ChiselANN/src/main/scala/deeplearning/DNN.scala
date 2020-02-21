@@ -19,7 +19,7 @@ class DNN(
   })
 
   // 784 * 30 dense layer
-  val dense_inNo = inNo
+  val dense_inNo: Int = inNo
   val dense_outNo = 30
   val dense = Module(new DenseLayer(
     dtype,dense_inNo,dense_outNo,dense_bias,dense_weights

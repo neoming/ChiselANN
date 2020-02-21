@@ -26,6 +26,7 @@ object NeuronSuit extends App{
 
     val weights: Seq[Seq[SInt]] = TestTools.getTwoDimArryAsSInt(wfname,dtype)
     val input: Seq[SInt] = TestTools.getOneDimArryAsSInt(ifname,dtype)
+    val output: SInt = TestTools.getOneDimArryAsSInt(rfname,dtype,0).head
 
     for(i <- input.indices){
       print(i + " weight is" + weights.head(i) + " input is " + input(i) + "\n")
@@ -33,9 +34,10 @@ object NeuronSuit extends App{
       poke(c.io.in(i),input(i))
     }
 
-    step(10)
+    step(c.latency)
     print(peek(c.io.mul_res.get))
     print(peek(c.io.out) + "\n")
+    expect(c.io.out,output)
   }
 
   def main():Unit = {
@@ -46,4 +48,6 @@ object NeuronSuit extends App{
     runNeuronDebugTester(weights_file_name,bias_file_name,
       input_file_name,result_file_name,SInt(16.W),30)
   }
+
+  main()
 }

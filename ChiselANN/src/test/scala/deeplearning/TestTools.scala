@@ -10,20 +10,20 @@ object TestTools {
   val fracBits = 4
   val src_path = "src/main/resources/"
 
-  def getTwoDimArryAsSInt(fname: String,dtype:SInt):Seq[Seq[SInt]] = {
+  def getTwoDimArryAsSInt(fname: String,dtype:SInt,frac:Int = fracBits):Seq[Seq[SInt]] = {
     val buffer = scala.io.Source.fromFile(src_path + fname)
     val buffer_raw = buffer.getLines().toList
     val result = buffer_raw.map(_.split(",").toList.map(x => {
-      BigInt(math.round( x.toFloat * ( 1 << fracBits ) ).toInt)
+      BigInt(math.round( x.toFloat * ( 1 << frac ) ).toInt)
     }).map( x => x.asSInt(dtype.getWidth.W))).transpose
     result
   }
 
-  def getOneDimArryAsSInt(fname: String,dtyp:SInt):Seq[SInt] = {
+  def getOneDimArryAsSInt(fname: String,dtyp:SInt,frac:Int = fracBits):Seq[SInt] = {
     val buffer = scala.io.Source.fromFile(src_path + fname)
     val buffer_raw = buffer.getLines().toList
     val result = buffer_raw(0).split(",").toList.map(x => {
-      BigInt(math.round( x.toFloat * ( 1 << fracBits)).toInt)
+      BigInt(math.round( x.toFloat * ( 1 << frac)).toInt)
     }).map( x => x.asSInt(dtyp.getWidth.W))
     result
   }
