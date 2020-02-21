@@ -2,7 +2,7 @@
 package deeplearning
 
 import chisel3._
-import chisel3.util.{ShiftRegister, log2Ceil}
+import chisel3.util.log2Ceil
 
 class Neuron(
   dtype : SInt,
@@ -11,6 +11,7 @@ class Neuron(
   debug:Boolean,
   frac_bits:Int = 0,
 ) extends Module {
+
   val io = IO(new Bundle {
     val in      = Input(Vec(inputs,dtype ))
     val weights = Input(Vec(inputs,dtype))
@@ -28,7 +29,7 @@ class Neuron(
   }
 
   while( mac.size > 1 ) {
-    mac = mac.grouped( 2 ).map( grp => {
+    mac = mac.grouped(2).map( grp => {
       val toSum = grp.reduce( _ + _ )
       RegNext( toSum )
     }).toList
@@ -43,7 +44,7 @@ class Neuron(
   val zero: SInt = 0.S.asTypeOf( dtype )
   relu := zero
 
-  when(output > zero){
+  when(output > zero) {
     relu := output
   }
 

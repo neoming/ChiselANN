@@ -24,7 +24,12 @@ object DenseLayerSuit extends App{
     }
   }
 
-  class DenseLayerTester(c : DenseLayer,ifname:String,rfname:String,dtype:SInt) extends PeekPokeTester(c){
+  class DenseLayerTester(
+    c : DenseLayer,
+    ifname:String,
+    rfname:String,
+    dtype:SInt
+  ) extends PeekPokeTester(c){
     val inputs: Seq[SInt] = TestTools.getOneDimArryAsSInt(ifname,dtype)
     for( i <- inputs.indices ){
       poke(c.io.dataIn(i),inputs(i))
