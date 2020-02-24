@@ -9,8 +9,8 @@ class OutputLayer(
 ) extends Module {
 
   val io = IO(new Bundle() {
-    val input = Flipped(Decoupled(Vec(inNo, dtype)))
-    val output = Decoupled(UInt(log2Ceil(inNo).W))
+    val dataIn = Flipped(Decoupled(Vec(inNo, dtype)))
+    val dataOut = Decoupled(UInt(log2Ceil(inNo).W))
   })
 
   val result_bits: Int = log2Ceil(inNo)
@@ -22,7 +22,7 @@ class OutputLayer(
     .toList
 
   def comparator(a: UInt, b: UInt): UInt = {
-    val bigger = Mux(io.input.bits(a) > io.input.bits(b), a, b)
+    val bigger = Mux(io.dataIn.bits(a) > io.dataIn.bits(b), a, b)
     bigger
   }
 
@@ -36,7 +36,7 @@ class OutputLayer(
       .toList
   }
 
-  io.input.ready := true.B
-  io.output.valid := ShiftRegister(io.input.valid,latency,false.B,true.B)
-  io.output.bits := result.head
+  io.dataIn.ready := true.B
+  io.dataOut.valid := ShiftRegister(io.dataIn.valid,latency,false.B,true.B)
+  io.dataOut.bits := result.head
 }

@@ -6,17 +6,6 @@ import chisel3.iotesters.{Driver, PeekPokeTester}
 
 object OutputLayerSuit extends App{
 
-  def runOutputTester(
-    ifname:String,
-    rfname:String,
-    dtype:SInt,
-    inNo:Int,
-  ) : Unit = {
-    Driver(() => new OutputLayer(dtype,inNo)){
-      o => new OutputLayerTester(o,ifname,rfname,dtype)
-    }
-  }
-
   class OutputLayerTester(
     c : OutputLayer,
     ifname:String,
@@ -24,14 +13,25 @@ object OutputLayerSuit extends App{
     dtype:SInt
   )extends PeekPokeTester(c){
     val inputs: Seq[SInt] = TestTools.getOneDimArryAsSInt(ifname,dtype)
-    for(i <- inputs.indices){poke(c.io.input.bits(i),inputs(i))}
-    poke(c.io.input.valid,true.B)
+    for(i <- inputs.indices){poke(c.io.dataIn.bits(i),inputs(i))}
+    poke(c.io.dataIn.valid,true.B)
 
     for(i <- 0 until c.latency){
       step(1)
-      print("the " + i + " cycles output is " + peek(c.io.output.bits) + " valid is " + peek(c.io.output.valid) + "\n")
+      print("the " + i + " cycles output is " + peek(c.io.dataOut.bits) + " valid is " + peek(c.io.dataOut.valid) + "\n")
     }
-    expect(c.io.output.bits,7.U)
+    expect(c.io.dataOut.bits,7.U)
+  }
+
+  def runOutputTester(
+   ifname:String,
+   rfname:String,
+   dtype:SInt,
+   inNo:Int,
+  ) : Unit = {
+    Driver(() => new OutputLayer(dtype,inNo)){
+      o => new OutputLayerTester(o,ifname,rfname,dtype)
+    }
   }
 
   def testOutputLayer():Unit = {
