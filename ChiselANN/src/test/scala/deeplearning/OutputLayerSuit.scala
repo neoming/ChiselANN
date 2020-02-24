@@ -24,16 +24,20 @@ object OutputLayerSuit extends App{
     dtype:SInt
   )extends PeekPokeTester(c){
     val inputs: Seq[SInt] = TestTools.getOneDimArryAsSInt(ifname,dtype)
-    for(i <- inputs.indices){
-      poke(c.io.input(i),inputs(i))
+    for(i <- inputs.indices){poke(c.io.input.bits(i),inputs(i))}
+    poke(c.io.input.valid,true.B)
+
+    for(i <- 0 until c.latency){
+      step(1)
+      print("the " + i + " cycles output is " + peek(c.io.output.bits) + " valid is " + peek(c.io.output.valid) + "\n")
     }
-    step(c.latency)
-    expect(c.io.output,7.U)
+    expect(c.io.output.bits,7.U)
   }
 
   def testOutputLayer():Unit = {
     val input_file_name = "dense1_output_7.csv"
     runOutputTester(input_file_name,"",SInt(16.W),10)
   }
+
   testOutputLayer()
 }

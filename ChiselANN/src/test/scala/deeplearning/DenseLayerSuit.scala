@@ -32,10 +32,15 @@ object DenseLayerSuit extends App{
   ) extends PeekPokeTester(c){
     val inputs: Seq[SInt] = TestTools.getOneDimArryAsSInt(ifname,dtype)
     for( i <- inputs.indices ){
-      poke(c.io.dataIn(i),inputs(i))
+      poke(c.io.dataIn.bits(i),inputs(i))
     }
-    step(c.latency)
-    TestTools.writeRowToCsv(peek(c.io.dataOut).toList, rfname)//write result
+    poke(c.io.dataIn.valid,true.B)
+    for(i <- 0 until c.latency){
+      step(1)
+      print("the " + i + " cycles output is " + peek(c.io.dataOut.bits) + " valid is " + peek(c.io.dataOut.valid) + "\n")
+    }
+
+    TestTools.writeRowToCsv(peek(c.io.dataOut.bits).toList, rfname)//write result
   }
 
   def testDense1():Unit = {
@@ -54,5 +59,5 @@ object DenseLayerSuit extends App{
     runDenseTester(weights_file_name,bias_file_name,input_file_name,result_file_name,SInt(16.W),784,30,4)
   }
 
-  testDense()
+  testDense1()
 }
