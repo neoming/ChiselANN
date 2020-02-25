@@ -1,4 +1,5 @@
 ### Project Specific stuff
+src/main/python/notebooks/*
 test_run_dir/*
 ### XilinxISE template
 # intermediate build files
