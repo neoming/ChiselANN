@@ -2,6 +2,7 @@
 
 import tensorflow as tf
 import matplotlib.pyplot as plt
+import extract_tools as tool
 
 # get data from data set
 mnist = tf.keras.datasets.mnist
@@ -29,7 +30,7 @@ model.fit(x_train, y_train, epochs=5)
 model.evaluate(x_test, y_test)
 
 # save model in h5 format
-model.save('./ChiselANN/src/main/resources/chisel_ann_20_10.h5')
+model.save(tool.ann_path + "chisel_ann_20_10.h5")
 
 # load model in h5 format 
 #model = tf.keras.models.load_model('./tensorflow/model/chisel_ann_20_10.h5')

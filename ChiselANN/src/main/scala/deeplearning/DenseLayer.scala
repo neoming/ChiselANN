@@ -19,7 +19,7 @@ class DenseLayer (
   })
 
   val neurons: List[Neuron] = ( 0 until outNo).map(i =>{
-    val neuron = Module(new Neuron(dtype , inNo ,bias(i),false,frac_bits))
+    val neuron = Module(new Neuron(dtype , inNo ,false,frac_bits))
     neuron.io.in <> io.dataIn.bits
     neuron.io.weights <> weights(i)
     neuron.io.bias := bias(i)
@@ -27,7 +27,7 @@ class DenseLayer (
     neuron
   }).toList
 
-  val latency: Int = neurons.head.mac_latency + neurons.head.act_latency
+  val latency: Int = neurons.head.total_latency
 
   io.dataIn.ready := true.B
   io.dataOut.valid := ShiftRegister(io.dataIn.valid, latency, false.B, true.B)

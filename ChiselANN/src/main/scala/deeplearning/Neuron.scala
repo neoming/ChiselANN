@@ -7,7 +7,6 @@ import chisel3.util.log2Ceil
 class Neuron(
   dtype : SInt,
   inputs: Int,
-  bias : SInt,
   debug:Boolean,
   frac_bits:Int = 0,
 ) extends Module {
@@ -39,7 +38,7 @@ class Neuron(
 
   val mac_shift: SInt = Wire(mac.head.cloneType)
   mac_shift := RegNext(mac.head >> frac_bits.U)
-  val output = RegNext(mac_shift + bias)
+  val output = RegNext(mac_shift + io.bias)
   val relu: SInt = Wire( dtype )
   val zero: SInt = 0.S.asTypeOf( dtype )
   relu := zero
@@ -48,6 +47,7 @@ class Neuron(
     relu := output
   }
 
+  val total_latency: Int = mac_latency + act_latency
   io.act := RegNext(relu)
 
   if(debug){
