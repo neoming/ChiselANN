@@ -64,29 +64,32 @@ def getFilter(matrix,pi,pj,width,height):
             result[i][j] = matrix[pi+i][pj+j] 
     return result
 
-def neuron(ma,mb,w,h,bias):
+def neuron(ma,mb,w,h,bias,frac_bits):
     neuron_result = 0.0
     for i in range(w):
         for j in range(h):
             neuron_result += ma[i][j] * mb[i][j]
+    
+    factor = 1 << frac_bits
+    neuron_result = np.round( neuron_result / factor )
     neuron_result = neuron_result + bias
     # relu
     if neuron_result > 0: return neuron_result
     else: return 0.0
 
-def conv(matrix,conv_weights,conv_bias):
+def conv(matrix,conv_weights,conv_bias,frac_bits):
     conv_result = np.empty((24,24),dtype = float)
     for i in range(24):
         for j in range(24):
             conv_matrix = getFilter(matrix,i,j,5,5)
-            conv_result[i][j] = neuron(conv_matrix,conv_weights,5,5,conv_bias)
+            conv_result[i][j] = neuron(conv_matrix,conv_weights,5,5,conv_bias,frac_bits) 
     return conv_result  
 
 def generate_conv_test_output(wfname,bfname,ifname,rfname,frac_bits,filter):
     weights = roundMatrix(getMatrixFromCsv(wfname),frac_bits,2)
     bias = roundMatrix(getMatrixFromCsv(bfname),frac_bits,1)
     inputs = roundMatrix(getMatrixFromCsv(ifname),frac_bits,2)
-    output = conv(inputs,weights,bias[filter])
+    output = conv(inputs,weights,bias[filter],frac_bits)
     write_matrix_to_file(output,rfname)
     return output
 
@@ -99,3 +102,16 @@ def getInput(path):
   for i in range(5):
       write_to_file(x_test[i].flatten(),path + "input_1d_"+str(y_test[i])+".csv",1)
       write_to_file(x_test[i],path + "input_2d_"+str(y_test[i])+".csv",2)
+
+def getConvResultFromCsv(path,w,h,f):
+  result = np.loadtxt(path,dtype = int,delimiter=",",unpack=False)
+  print(result.shape)
+  for i in range(f):
+    temp = np.empty((w,h), dtype = int)
+    for j in range(w):
+      for k in range(h):
+        temp[k][j] = result[i*w*h + j + k*w]
+    write_matrix_to_file(temp,cnn_path + "v_conv" + str(i)+"_test_output_7.csv")
+
+
+#getConvResultFromCsv(cnn_path + "v_conv_test_output_7.csv",24,24,3)

@@ -3,8 +3,6 @@ import extract_tools as tool
 
 path = tool.ann_path
 
-
-
 dense1test = list()
 dense1test.append(path+"dense1_weights.csv")
 dense1test.append(path+"dense1_weights_bias.csv")
