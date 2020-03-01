@@ -43,20 +43,25 @@ def neuron(ma,mb,w,h,bias):
     if neuron_result > 0: return neuron_result
     else: return 0.0
 
-def conv(matrix,i):
+def conv(matrix,bias,filter):
+    print("now is filter " + str(filter) + " with bias: " + str(bias))
     conv_result = np.empty((24,24),dtype = float)
+    conv_weights = np.empty((24,24), dtype = float)
+    if filter == 0 :
+        print("conv0")
+        conv_weights = conv0_weights
+    elif filter == 1:
+        print("conv1")
+        conv_weights = conv1_weights
+    else:
+        print("conv2")
+        conv_weights = conv2_weights
     for i in range(24):
         for j in range(24):
             conv_matrix = getFilter(matrix,i,j,5,5)
-            if i == 0 :
-                conv_weights = conv0_weights
-            elif i == 1:
-                conv_weights = conv1_weights
-            else:
-                conv_weights = conv2_weights
-            conv_result[i][j] = neuron(conv_matrix,conv0_weights,5,5,bias[0])
+            conv_result[i][j] = neuron(conv_matrix,conv_weights,5,5,bias)
     return conv_result
 
-tool.write_to_file(conv(x_test[0],0),path + "conv0_manual_output_7.csv",2)
-tool.write_to_file(conv(x_test[0],1),path + "conv1_manual_output_7.csv",2)
-tool.write_to_file(conv(x_test[0],2),path + "conv2_manual_output_7.csv",2)
+tool.write_to_file(conv(x_test[0],bias[0],0),path + "conv0_manual_output_7.csv",2)
+tool.write_to_file(conv(x_test[0],bias[1],1),path + "conv1_manual_output_7.csv",2)
+tool.write_to_file(conv(x_test[0],bias[2],2),path + "conv2_manual_output_7.csv",2)

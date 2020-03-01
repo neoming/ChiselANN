@@ -17,12 +17,12 @@ object Conv2DLayerSuit extends App {
       poke(c.io.dataIn.bits(i),inputs(i))
     }
     poke(c.io.dataIn.valid,true.B)
-
+    print(" the valid signal is :" + peek(c.io.dataOut.valid) + '\n')
     for(i <- 0 until c.latency){
       step(1)
       //print("the " + i + " cycle: " + peek(c.io.dataOut.bits) + " valid is " + peek(c.io.dataOut.valid) + "\n")
     }
-
+    print("after " + c.latency + " cycles, the valid signal is :" + peek(c.io.dataOut.valid) + '\n')
     TestTools.writeRowToCsv(peek(c.io.dataOut.bits).toList, rfname)//write result
   }
 
