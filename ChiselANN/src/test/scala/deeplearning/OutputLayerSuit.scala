@@ -35,7 +35,7 @@ object OutputLayerSuit extends App{
   }
 
   def testOutputLayer():Unit = {
-    val input_file_name = "dense1_output_7.csv"
+    val input_file_name = "test_ann/dense1_output_7.csv"
     runOutputTester(input_file_name,"",SInt(16.W),10)
   }
 

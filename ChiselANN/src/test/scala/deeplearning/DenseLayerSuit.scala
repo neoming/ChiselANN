@@ -43,18 +43,18 @@ object DenseLayerSuit extends App{
   }
 
   def testDense1():Unit = {
-    val weights_file_name = "dense1_weights.csv"
-    val bias_file_name = "dense1_bias.csv"
-    val input_file_name = "dense_output_0.csv"
-    val result_file_name = "test_dense1_output_0.csv"
+    val weights_file_name = "test_ann/dense1_weights.csv"
+    val bias_file_name = "test_ann/dense1_bias.csv"
+    val input_file_name = "test_ann/dense_output_0.csv"
+    val result_file_name = "test_ann/test_dense1_output_0.csv"
     runDenseTester(weights_file_name,bias_file_name,input_file_name,result_file_name,SInt(16.W),30,10,4)
   }
 
   def testDense():Unit = {
-    val weights_file_name = "dense_weights.csv"
-    val bias_file_name = "dense_bias.csv"
-    val input_file_name = "flatten_output_0.csv"
-    val result_file_name = "test_dense_output_0.csv"
+    val weights_file_name = "test_ann/dense_weights.csv"
+    val bias_file_name = "test_ann/dense_bias.csv"
+    val input_file_name = "test_ann/flatten_output_0.csv"
+    val result_file_name = "test_ann/test_dense_output_0.csv"
     runDenseTester(weights_file_name,bias_file_name,input_file_name,result_file_name,SInt(16.W),784,30,4)
   }
 

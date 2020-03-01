@@ -44,14 +44,14 @@ object NeuronNetworkSuit extends App{
   }
 
   def testNeuronNetwork():Unit = {
-    val dense_weights_file = "dense_weights.csv"
-    val dense_bias_file = "dense_bias.csv"
-    val dense1_weights_file = "dense1_weights.csv"
-    val dense1_bias_file = "dense1_bias.csv"
+    val dense_weights_file = "test_ann/dense_weights.csv"
+    val dense_bias_file = "test_ann/dense_bias.csv"
+    val dense1_weights_file = "test_ann/dense1_weights.csv"
+    val dense1_bias_file = "test_ann/dense1_bias.csv"
     val wfname = Seq[String](dense_weights_file,dense1_weights_file)
     val bfname = Seq[String](dense_bias_file,dense1_bias_file)
-    val input_file = "flatten_output_0.csv"
-    val result_file = "test_neuron_0.csv"
+    val input_file = "test_ann/flatten_output_0.csv"
+    val result_file = "test_ann/test_neuron_0.csv"
     runNeuronNetworkTester(wfname,bfname,input_file,result_file,
       SInt(16.W),784,10,4)
   }

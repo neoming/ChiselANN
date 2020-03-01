@@ -37,19 +37,18 @@ class Conv2DLayer(
                     neuron.io.bias := bias(f)
                     val inputBaseW: Int = i * strideWidth
                     val inputBaseH: Int  = j * strideHeight
+                    val outputIndex: Int = f * outputWidth * outputHeight + i + outputWidth * j
                     for(w <- 0 until filterWidth){
                         for(h <- 0 until filterHeight){
                             val inputW: Int = inputBaseW + w
                             val inputH: Int = inputBaseH + h
                             val inputIndex: Int = inputW + inputH * dataWidth
                             val neuronInputIndex: Int = w + filterWidth * h
-                            val outputIndex: Int = f * filterWidth * filterWidth + w + filterWidth * h
-
                             neuron.io.in(neuronInputIndex) := io.dataIn.bits(inputIndex)
                             neuron.io.weights(neuronInputIndex) := weights(f)(w)(h)
-                            io.dataOut.bits(outputIndex) := neuron.io.act
                         }
                     }
+                    io.dataOut.bits(outputIndex) := neuron.io.act
                     neuron
                 }).toList
             }).toList

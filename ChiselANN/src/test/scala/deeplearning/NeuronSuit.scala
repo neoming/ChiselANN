@@ -35,16 +35,16 @@ object NeuronSuit extends App{
   ) : Boolean = {
     val bias = TestTools.getOneDimArryAsSInt(bfname,dtype)
     //chisel3.Driver.emitVerilog(new DenseLayer(dtype,inNo,outNo,bias,weights)
-    Driver(() =>new Neuron(SInt(16.W),inNo,bias.head,true)){
+    Driver(() =>new Neuron(SInt(16.W),inNo,true)){
       n => new NeuronDebugTester(n,wfname,ifname,rfname,dtype)
     }
   }
 
   def main():Unit = {
-    val weights_file_name = "dense1_weights.csv"
-    val bias_file_name = "dense1_bias.csv"
-    val input_file_name = "dense_output_0.csv"
-    val result_file_name = "test_dense1_output_0.csv"
+    val weights_file_name = "test_ann/dense1_weights.csv"
+    val bias_file_name = "test_ann/dense1_bias.csv"
+    val input_file_name = "test_ann/dense_output_0.csv"
+    val result_file_name = "test_ann/test_dense1_output_0.csv"
     runNeuronDebugTester(weights_file_name,bias_file_name,
       input_file_name,result_file_name,SInt(16.W),30)
   }
