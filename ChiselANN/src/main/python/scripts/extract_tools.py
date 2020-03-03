@@ -3,6 +3,7 @@ import numpy as np
 
 ann_path = "./ChiselANN/src/main/resources/test_ann/"
 cnn_path = "./ChiselANN/src/main/resources/test_cnn/"
+
 # transfer float32 to str
 def float_to_str( x ):
   if isinstance( x[0], int ):
@@ -13,7 +14,6 @@ def float_to_str( x ):
 def write_to_file( inputs, fname, no_dims = 2):
   f_out = open( fname, "w" ,newline='')
   wrt = csv.writer( f_out )
-  
   if no_dims == 2:
     for a in inputs:
         tmp = wrt.writerow( float_to_str( a ) )
@@ -48,6 +48,8 @@ def roundMatrix(matrix,frac_bits,dim = 2):
                 result[i][j] = round_to(matrix[i][j],frac_bits)
         return result
 
+##################################################################################
+# dense calculation
 def generate_dense_test_output(wfname,bfname,ifname,rfname,frac_bits,path):
     weights = roundMatrix(getMatrixFromCsv(wfname),frac_bits,2)
     bias = roundMatrix(getMatrixFromCsv(bfname),frac_bits,1)
@@ -56,7 +58,8 @@ def generate_dense_test_output(wfname,bfname,ifname,rfname,frac_bits,path):
     print(output)
     return output
 
-
+##################################################################################
+# conv calculation
 def getFilter(matrix,pi,pj,width,height):
     result = np.empty((width,height), dtype = float)
     for i in range(width):
@@ -93,6 +96,7 @@ def generate_conv_test_output(wfname,bfname,ifname,rfname,frac_bits,filter):
     write_matrix_to_file(output,rfname)
     return output
 
+# get images from
 def getInput(path):
   import tensorflow as tf
   # get data from data set
@@ -113,5 +117,38 @@ def getConvResultFromCsv(path,w,h,f):
         temp[k][j] = result[i*w*h + j + k*w]
     write_matrix_to_file(temp,cnn_path + "v_conv" + str(i)+"_test_output_7.csv")
 
-
 #getConvResultFromCsv(cnn_path + "v_conv_test_output_7.csv",24,24,3)
+
+##################################################################################
+# maxpooling calculation
+def maxPool(ma,w,h):
+  result = 0
+  for i in range(w):
+    for j in range(h):
+      result = max(ma[i][j],result)
+  return result
+
+def maxPooling(matrix):
+  maxpooling = np.empty((12,12),dtype = int)
+  for i in range(12):
+    for j in range(12):
+      mp_matrix = getFilter(matrix,i*2,j*2,2,2)
+      maxpooling[i][j] = maxPool(mp_matrix,2,2)
+  return maxpooling
+
+def generate_maxpooling_test_output(ifname,rfname,frac_bits):
+    inputs = roundMatrix(getMatrixFromCsv(ifname),frac_bits,2)
+    output = maxPooling(inputs)
+    write_matrix_to_file(output,rfname)
+    return output
+
+def getMaxPoolResultFromCsv(path,w,h,f):
+  result = np.loadtxt(path,dtype = int,delimiter=",",unpack=False)
+  for i in range(f):
+    temp = np.empty((w,h), dtype = int)
+    for j in range(w):
+      for k in range(h):
+        temp[k][j] = result[i*w*h + j + k*w]
+    write_matrix_to_file(temp,cnn_path + "v_maxpooling" + str(i)+"_test_output_7.csv")
+
+getMaxPoolResultFromCsv(cnn_path + "v_maxpooling_test_output_7.csv",12,12,3)
