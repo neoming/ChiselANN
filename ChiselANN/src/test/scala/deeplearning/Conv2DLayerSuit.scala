@@ -10,7 +10,7 @@ object Conv2DLayerSuit extends App {
     c:Conv2DLayer,
     ifname:String,
     rfname:String,
-    dtype:SInt
+    dtype:SInt,
   ) extends PeekPokeTester(c){
     val inputs:Seq[SInt] = TestTools.getOneDimArryAsSInt(ifname,dtype);
     for(i <- inputs.indices){
