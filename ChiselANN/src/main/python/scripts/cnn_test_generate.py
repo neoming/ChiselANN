@@ -27,5 +27,3 @@ def testMaxPooling():
     maxp2_input = path + "conv2_output_7.csv"
     maxp2_output = path + "maxPooling2_test_output_7.csv"
     maxp2_result = tool.generate_maxpooling_test_output(maxp2_input,maxp2_output,4)
-
-testMaxPooling()   
