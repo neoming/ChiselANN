@@ -37,8 +37,8 @@ object NeuronNetworkSuit extends App{
     val dense_bias = TestTools.getOneDimArryAsSInt(bfname.head,dtype)
     val dense1_bias = TestTools.getOneDimArryAsSInt(bfname(1),dtype)
     Driver(() => new NeuronNetwork(
-      dtype,inNo,outNo, dense_bias,dense_weights,
-      dense1_bias,dense1_weights,frac_bits)){
+      dtype,inNo = inNo,outNo = outNo, dense_bias = dense_bias, dense_weights = dense_weights,
+      dense1_bias = dense1_bias,dense1_weights = dense1_weights,frac_bits = frac_bits)){
       n => new NeuronNetworkTester(n,ifname,rfname,dtype)
     }
   }

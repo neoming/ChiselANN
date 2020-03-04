@@ -6,11 +6,11 @@ import chisel3.util._
 
 class DenseLayer (
   dtype : SInt,//input data type
-  inNo : Int,//input Number
-  outNo : Int,//output Number
   bias : Seq[SInt],//length equal to output Number
   weights : Seq[Seq[SInt]],//[outNo][inNo]
   frac_bits : Int = 0,//frac_bits
+  inNo : Int = 432,//input Number
+  outNo : Int = 10,//output Number
 ) extends Module{
 
   val io = IO(new Bundle() {

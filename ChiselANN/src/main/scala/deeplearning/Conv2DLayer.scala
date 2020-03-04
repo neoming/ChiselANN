@@ -6,6 +6,8 @@ import chisel3.util._
 
 class Conv2DLayer(
     dtype : SInt,
+    weights : Seq[Seq[Seq[SInt]]],//[filter_index][i][j]
+    bias : Seq[SInt],//[filter_index]
     dataWidth : Int = 28,
     dataHeight : Int = 28,
     filterWidth : Int = 5,
@@ -13,12 +15,10 @@ class Conv2DLayer(
     filterBatch : Int = 3,
     strideWidth : Int = 1,
     strideHeight : Int = 1,
-    weights : Seq[Seq[Seq[SInt]]],//[filter_index][i][j]
-    bias : Seq[SInt],//[filter_index]
     frac_bits : Int = 0,
 ) extends Module{
 
-    val inputNo: Int = dataWidth * dataWidth;
+    val inputNo: Int = dataWidth * dataWidth
     val outputWidth: Int = (dataWidth - filterWidth + 1 )/strideWidth
     val outputHeight: Int = (dataHeight - filterHeight + 1 )/strideHeight
     val outputNo: Int = outputWidth * outputHeight * filterBatch

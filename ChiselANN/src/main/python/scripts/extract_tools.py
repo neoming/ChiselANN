@@ -60,7 +60,7 @@ def generate_dense_test_output(wfname,bfname,ifname,rfname,frac_bits,path):
     output = np.dot(inputs,weights) + bias
     print(output)
     return output
-
+generate_dense_test_output(cnn_path + "dense_weights.csv",cnn_path + "dense_bias.csv",cnn_path + "flatten_output_7.csv","",4,"")
 ##################################################################################
 # conv calculation
 def getFilter(matrix,pi,pj,width,height):
@@ -173,4 +173,4 @@ def flatten_output_compare(v_output,t_output,rfname):
   tmp = wrt.writerow(["{:>8d}".format(int(y)) for y in v_output])
   f_out.close()
 
-flatten_output_compare(cnn_path + "v_flatten_test_output_7.csv",cnn_path + "flatten_test_output_7.csv",cnn_path + "flatten_output_compare_7.csv")
+#flatten_output_compare(cnn_path + "v_flatten_test_output_7.csv",cnn_path + "flatten_test_output_7.csv",cnn_path + "flatten_output_compare_7.csv")

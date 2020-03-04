@@ -5,7 +5,7 @@ import chisel3.util._
 
 class OutputLayer(
     dtype: SInt,
-    inNo: Int,
+    inNo: Int = 10,
 ) extends Module {
 
   val io = IO(new Bundle() {

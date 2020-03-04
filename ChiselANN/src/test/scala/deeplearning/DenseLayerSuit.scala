@@ -37,7 +37,7 @@ object DenseLayerSuit extends App{
   ) : Boolean = {
     val weights = TestTools.getTwoDimArryAsSInt(wfname,dtype)
     val bias = TestTools.getOneDimArryAsSInt(bfname,dtype)
-    Driver(() =>new DenseLayer(dtype,inNo,outNo,bias,weights,frac_bits)){
+    Driver(() =>new DenseLayer(dtype,inNo = inNo,outNo = outNo,bias = bias,weights = weights,frac_bits = frac_bits)){
       d => new DenseLayerTester(d,ifname,rfname,dtype)
     }
   }
@@ -58,5 +58,12 @@ object DenseLayerSuit extends App{
     runDenseTester(weights_file_name,bias_file_name,input_file_name,result_file_name,SInt(16.W),784,30,4)
   }
 
-  testDense1()
+  def testCnnDense():Unit = {
+    val weights = "test_cnn/dense_weights.csv"
+    val bias = "test_cnn/dense_bias.csv"
+    val input = "test_cnn/flatten_output_7.csv"
+    val output = "test_cnn/v_dense_output_7.csv"
+    runDenseTester(weights,bias,input,output,SInt(16.W),inNo = 432,outNo = 10,frac_bits = 4)
+  }
+  testCnnDense()
 }
