@@ -21,11 +21,14 @@ def write_to_file( inputs, fname, no_dims = 2):
     tmp = wrt.writerow( float_to_str( inputs ) )
   f_out.close()
 
-def write_matrix_to_file( inputs, fname):
+def write_matrix_to_file( inputs, fname, no_dims = 2):
   f_out = open( fname, "w" ,newline='')
   wrt = csv.writer( f_out )
-  for a in inputs:
-    tmp = wrt.writerow(["{:>8d}".format(int(y)) for y in a])
+  if no_dims == 2:
+    for a in inputs:
+      tmp = wrt.writerow(["{:>8d}".format(int(y)) for y in a])
+  else:
+    tmp = wrt.writerow(["{:>8d}".format(int(y)) for y in inputs])
   f_out.close()
 
 def round_to( x, frac_bits ):
@@ -151,4 +154,23 @@ def getMaxPoolResultFromCsv(path,w,h,f):
         temp[k][j] = result[i*w*h + j + k*w]
     write_matrix_to_file(temp,cnn_path + "v_maxpooling" + str(i)+"_test_output_7.csv")
 
-getMaxPoolResultFromCsv(cnn_path + "v_maxpooling_test_output_7.csv",12,12,3)
+#getMaxPoolResultFromCsv(cnn_path + "v_maxpooling_test_output_7.csv",12,12,3)
+
+########################################################
+# flatten_output
+def generate_flatten_test_output(ifname,rfname,frac_bits):
+  inputs = roundMatrix(getMatrixFromCsv(ifname),frac_bits,1)
+  write_matrix_to_file(inputs,rfname,1)
+  return inputs
+#generate_flatten_test_output(cnn_path + "flatten_output_7.csv",cnn_path + "flatten_test_output_7.csv",4)
+
+def flatten_output_compare(v_output,t_output,rfname):
+  v_output = getMatrixFromCsv(v_output)
+  t_output = getMatrixFromCsv(t_output)
+  f_out = open( rfname, "w" ,newline='')
+  wrt = csv.writer( f_out )
+  tmp = wrt.writerow(["{:>8d}".format(int(y)) for y in t_output])
+  tmp = wrt.writerow(["{:>8d}".format(int(y)) for y in v_output])
+  f_out.close()
+
+flatten_output_compare(cnn_path + "v_flatten_test_output_7.csv",cnn_path + "flatten_test_output_7.csv",cnn_path + "flatten_output_compare_7.csv")
