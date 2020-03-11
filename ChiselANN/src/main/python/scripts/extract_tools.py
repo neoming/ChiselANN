@@ -3,7 +3,7 @@ import numpy as np
 
 ann_path = "./ChiselANN/src/main/resources/test_ann/"
 cnn_path = "./ChiselANN/src/main/resources/test_cnn/"
-
+test_path = "./ChiselANN/src/main/resources/test/"
 # transfer float32 to str
 def float_to_str( x ):
   if isinstance( x[0], int ):
@@ -60,7 +60,7 @@ def generate_dense_test_output(wfname,bfname,ifname,rfname,frac_bits,path):
     output = np.dot(inputs,weights) + bias
     print(output)
     return output
-generate_dense_test_output(cnn_path + "dense_weights.csv",cnn_path + "dense_bias.csv",cnn_path + "flatten_output_7.csv","",4,"")
+#generate_dense_test_output(cnn_path + "dense_weights.csv",cnn_path + "dense_bias.csv",cnn_path + "flatten_output_7.csv","",4,"")
 ##################################################################################
 # conv calculation
 def getFilter(matrix,pi,pj,width,height):
@@ -174,3 +174,26 @@ def flatten_output_compare(v_output,t_output,rfname):
   f_out.close()
 
 #flatten_output_compare(cnn_path + "v_flatten_test_output_7.csv",cnn_path + "flatten_test_output_7.csv",cnn_path + "flatten_output_compare_7.csv")
+
+def get_test_img(img_fname,labels_fname,batch_size):
+  import tensorflow as tf
+  # get data from data set
+  mnist = tf.keras.datasets.mnist
+  (x_train, y_train),(x_test, y_test) = mnist.load_data()
+  x_test = x_test / 255.0
+
+  for i in range(int(len(x_test)/batch_size)):
+    img_file = open( img_fname + '_' + str(i) + ".csv" , "w",newline = '')
+    img_wrt = csv.writer(img_file)
+    label_file = open( labels_fname + '_' + str(i) + ".csv" , "w" ,newline='')
+    label_wrt = csv.writer( label_file )
+
+    tmp = label_wrt.writerow(y_test[i*batch_size:i*batch_size+batch_size])
+    for j in range(batch_size):
+      tmp = img_wrt.writerow( float_to_str( x_test[j + i*batch_size].flatten()))
+
+    img_file.close()
+    label_file.close()
+
+
+get_test_img(test_path + "test_images",test_path + "test_labels",100)
