@@ -1,9 +1,13 @@
 
 package deeplearning
 
+import java.io.File
+
 import chisel3._
 import chisel3.iotesters.{Driver, PeekPokeTester}
 import chisel3.util.log2Ceil
+import com.github.tototoshi.csv.CSVWriter
+import deeplearning.TestTools.src_path
 
 object ConvNeuronNetworkSuit extends App {
   class CNNTester(
@@ -13,13 +17,14 @@ object ConvNeuronNetworkSuit extends App {
     dtype:SInt,
     frac_bits:Int
   ) extends PeekPokeTester(c){
-    var total_right = 0
-    for(b <- 0 until 100){
+
+    for(b <- 7 until 12){
       val img = ifname.head + "_" + b + ".csv"
       val label = ifname(1) + "_" + b + ".csv"
       val input_images: Seq[Seq[SInt]] = TestTools.getTwoDimArryAsSIntWithOutTrans(img ,dtype,frac_bits)
       val input_labels: Seq[UInt] = TestTools.getOneDimArryAsUInt(label ,UInt(log2Ceil(10).W),0)
-      var output = Seq[UInt]()
+      var output = Seq[BigInt]()
+      var log = Seq[String]()
       var right_no : Int = 0
       for(i <- input_images.indices){
         print("the " + i + " test start:\n")
@@ -29,26 +34,23 @@ object ConvNeuronNetworkSuit extends App {
         poke(c.io.dataIn.valid,true.B)
         step(1)
         poke(c.io.dataIn.valid,false.B)
-        for(k <- 0 until c.latency - 1){
-          step(1)
-          /*print("the " + k + " cycle: " + peek(c.io.dataOut.bits)
-            + " valid is " + peek(c.io.dataOut.valid) + "\n")*/
-          /*print("conv valid: " + peek(c.conv.io.dataOut.valid) + " maxPool valid: " + peek(c.maxPool.io.dataOut.valid)
-            + " flatten valid: " + peek(c.flatten.io.dataOut.valid ) + " dense valid: " + peek(c.dense.io.dataOut.valid)
-            + "output valid: " + peek(c.output_layer.io.dataOut.valid) + "\n")*/
-        }
+        step(c.latency - 1)
         val result = expect(c.io.dataOut.bits,input_labels(i))
         if(result){
           right_no = right_no + 1
-          total_right = total_right + 1
+        } else {
+          val log_msg = "[error] got " + peek(c.io.dataOut.bits) + " expected " + input_labels(i).toInt + "\n"
+          log = log :+ log_msg
+          print(log_msg)
         }
-        print("the " + i + " test result is:" + peek(c.io.dataOut.bits) + "expect" + input_labels(i) + "\n")
-        output = output :+ c.io.dataOut.bits
+        print("the " + i + " test result is:" + peek(c.io.dataOut.bits) + " expect " + input_labels(i).toInt + "\n")
+        val out = peek(c.io.dataOut.bits)
+        output = output :+ out
       }
       TestTools.writeRowToCsv(output,rfname + "_" + b + ".csv")
+      TestTools.writeRowToCsv(log,"test/wrong_msg_" + b + ".csv")
       print("the right number is " + right_no + "/" + input_labels.size + "\n")
     }
-    print("the right number is " + total_right + "/10000\n")
   }
 
   def runCNNTester(
