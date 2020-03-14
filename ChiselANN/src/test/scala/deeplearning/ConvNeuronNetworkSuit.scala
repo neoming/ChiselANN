@@ -18,7 +18,7 @@ object ConvNeuronNetworkSuit extends App {
     frac_bits:Int
   ) extends PeekPokeTester(c){
 
-    for(b <- 0 until 10){
+    for(b <- 1 until 10){
       val img = ifname.head + "_" + b + ".csv"
       val label = ifname(1) + "_" + b + ".csv"
       val input_images: Seq[Seq[SInt]] = TestTools.getTwoDimArryAsSIntWithOutTrans(img ,dtype,frac_bits)

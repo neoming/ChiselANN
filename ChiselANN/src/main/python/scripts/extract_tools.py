@@ -195,5 +195,9 @@ def get_test_img(img_fname,labels_fname,batch_size):
     img_file.close()
     label_file.close()
 
+#get_test_img(test_path + "test_images",test_path + "test_labels",100)
 
-get_test_img(test_path + "test_images",test_path + "test_labels",100)
+inputs = roundMatrix(getMatrixFromCsv(cnn_path + "input_1d_7.csv"),4,1)
+for i in range(784):
+  #print("reg[15:0] dataIn_bits_" + str(i) + " = 16'sd" + str(inputs[i]) + ";")
+  print(".io_dataIn_bits_" + str(i) + "(dataIn_bits_" + str(i) + "),")
