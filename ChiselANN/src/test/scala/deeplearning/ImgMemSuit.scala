@@ -29,8 +29,26 @@ object ImgMemSuit extends App {
     }
   }
 
-  Driver(() => new ImgMem(SInt(16.W),4,10)){
-    c => new ImgMemTester(c)
+  class ImgMemInitTester(c:ImgMem) extends PeekPokeTester(c){
+    //write to mem
+    for(j <- 0 until 28){
+      poke(c.io.addr,j)
+      println("mem[" + j + "]: " + peek(c.io.dataOut))
+    }
   }
 
+  def runWithOutImg(): Unit ={
+    Driver(() => new ImgMem(SInt(16.W),4,10,None)){
+      c => new ImgMemTester(c)
+    }
+  }
+
+  def runWithImg() : Unit = {
+    val input = "test_cnn/input_2d_7.csv"
+    val img = TestTools.getTwoDimArryAsSIntWithOutTrans(input,SInt(16.W),4)
+    Driver(() => new ImgMem(SInt(16.W),28,28,Some(img))){
+      c => new ImgMemInitTester(c)
+    }
+  }
+  runWithImg()
 }
