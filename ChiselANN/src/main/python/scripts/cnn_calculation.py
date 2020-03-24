@@ -13,18 +13,19 @@ mnist = tf.keras.datasets.mnist
 (x_train, y_train),(x_test, y_test) = mnist.load_data()
 x_train, x_test = x_train / 255.0, x_test / 255.0
 
-# get conv weights
-conv = model.get_layer(index = 0)
-bias = conv.weights[1]
-conv_weights = conv.weights[0]
-conv0_weights = np.empty((5,5), dtype = float)
-conv1_weights = np.empty((5,5), dtype = float)
-conv2_weights = np.empty((5,5), dtype = float)
-for i in range(5):
-    for j in range(5):
-        conv0_weights[i][j] = conv_weights[i][j][0][0]
-        conv1_weights[i][j] = conv_weights[i][j][0][1]
-        conv2_weights[i][j] = conv_weights[i][j][0][2]
+def get_conv_weight():
+    # get conv weights
+    conv = model.get_layer(index = 0)
+    bias = conv.weights[1]
+    conv_weights = conv.weights[0]
+    conv0_weights = np.empty((5,5), dtype = float)
+    conv1_weights = np.empty((5,5), dtype = float)
+    conv2_weights = np.empty((5,5), dtype = float)
+    for i in range(5):
+        for j in range(5):
+            conv0_weights[i][j] = conv_weights[i][j][0][0]
+            conv1_weights[i][j] = conv_weights[i][j][0][1]
+            conv2_weights[i][j] = conv_weights[i][j][0][2]
 
 def getFilter(matrix,pi,pj,width,height):
     result = np.empty((width,height), dtype = float)
@@ -62,6 +63,6 @@ def conv(matrix,bias,filter):
             conv_result[i][j] = neuron(conv_matrix,conv_weights,5,5,bias)
     return conv_result
 
-tool.write_to_file(conv(x_test[0],bias[0],0),path + "conv0_manual_output_7.csv",2)
-tool.write_to_file(conv(x_test[0],bias[1],1),path + "conv1_manual_output_7.csv",2)
-tool.write_to_file(conv(x_test[0],bias[2],2),path + "conv2_manual_output_7.csv",2)
+# tool.write_to_file(conv(x_test[0],bias[0],0),path + "conv0_manual_output_7.csv",2)
+# tool.write_to_file(conv(x_test[0],bias[1],1),path + "conv1_manual_output_7.csv",2)
+# tool.write_to_file(conv(x_test[0],bias[2],2),path + "conv2_manual_output_7.csv",2)

@@ -10,11 +10,11 @@ mnist = tf.keras.datasets.mnist
 x_train, x_test = x_train / 255.0, x_test / 255.0
 
 x_train = x_train.reshape(x_train.shape[0],28,28,1)
+x_test = x_test[:1000]
 x_test = x_test.reshape(x_test.shape[0],28,28,1)
-
 # load model
 model = tf.keras.models.load_model(path + 'chisel_cnn.h5')
-#model.evaluate(x_test, y_test)
+model.evaluate(x_test, y_test[0:1000])
 
 #model.summary()
 
@@ -74,4 +74,4 @@ def extract_flatten_output():
     flatten_output_7 = flatten_output[0]
     tool.write_to_file(flatten_output_7,path+"flatten_output_7.csv",1)
 
-extract_flatten_output()
+#extract_flatten_output()
