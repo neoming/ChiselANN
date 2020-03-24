@@ -26,6 +26,7 @@ class ConvBufferLine(
       io.dataOut.bits(w + h * width) := buffer(h)(w)
     }
 
+  val latency : Int = height
   io.dataIn.ready := true.B
   io.dataOut.valid := RegNext(full)
 }

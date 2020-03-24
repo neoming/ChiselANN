@@ -31,8 +31,10 @@ object ConvLayerSuit extends App {
     val io = IO(new Bundle{
       val inputBundle = new InputBundle(dtype = dtype,dataWidth = dataWidth,dataHeight = dataHeight)
       val dataOut = Decoupled(Vec(outputNo,dtype))
+      //for debug
+      val conv_buffer = Output(Vec(filterHeight*dataWidth,dtype))
+      val conv_buffer_valid = Output(Bool())
       val conv_line = Output(Vec(filterBatch,Vec(outputWidth,dtype)))
-      val result_addr = Output(UInt(log2Ceil(outputHeight).W))
       val conv_line_valid = Output(Bool())
     })
 
@@ -43,8 +45,6 @@ object ConvLayerSuit extends App {
       filterHeight = filterHeight,
       img = img,
     ))
-
-    getInputImg.io.inputBundle <> io.inputBundle
 
     val convLayer = Module(new ConvLayer(
       dtype = dtype,
@@ -60,14 +60,16 @@ object ConvLayerSuit extends App {
       frac_bits = frac_bits
     ))
 
+    getInputImg.io.inputBundle <> io.inputBundle
     convLayer.io.dataIn <> getInputImg.io.dataOut
-
     io.dataOut <> convLayer.io.dataOut
+
+    val latency : Int = convLayer.latency
     //for debug
     io.conv_line := convLayer.io.conv_line
-    io.result_addr := convLayer.io.result_addr
     io.conv_line_valid := convLayer.io.conv_line_valid
-    val latency : Int = convLayer.latency
+    io.conv_buffer_valid := convLayer.io.conv_buffer_valid
+    io.conv_buffer := convLayer.io.conv_buffer
   }
 
   class ConvLayerTester(
@@ -83,13 +85,15 @@ object ConvLayerSuit extends App {
       step(1)
       i = i + 1
       if(peek(c.io.conv_line_valid) == 1){
-        print("cycle " + i + ": conv_line_result = " + peek(c.io.conv_line) + " ; addr = " + peek(c.io.result_addr) + "\n" )
+        print("cycle " + i + ": conv_line = " + peek(c.io.conv_line) + " ;\n" )
+      }
+      if(peek(c.io.conv_buffer_valid) == 1){
+        print("cycle " + i + ": conv_buffer = " + peek(c.io.conv_buffer) + " ;\n" )
       }
     }
+    step(1)
     print("after " + c.latency + " cycles, the valid signal is :" + peek(c.io.dataOut.valid) + '\n')
     TestTools.writeRowToCsv(peek(c.io.dataOut.bits).toList, rfname)//write result
-    print("bias " + peek(c.convLayer.conv_line.bias_rom) + '\n')
-    print("weight " + peek(c.convLayer.conv_line.weight_rom) + '\n')
   }
 
   def runConvTester(
@@ -108,7 +112,13 @@ object ConvLayerSuit extends App {
 
     val bias = TestTools.getOneDimArryAsSInt(fname = bfname,dtyp = dtype,frac = frac_bits)
     val img = TestTools.getTwoDimArryAsSIntWithOutTrans(fname = ifname,dtype = dtype,frac = frac_bits)
-    Driver(() => new ConvLayerWithInput(dtype,img = Some(img),conv_weights = weights,conv_bias = bias,frac_bits = frac_bits)){
+    Driver(() => new ConvLayerWithInput(
+      dtype = dtype,
+      img = Some(img),
+      conv_weights = weights,
+      conv_bias = bias,
+      frac_bits = frac_bits
+    )){
       c => new ConvLayerTester(c,rfname,dtype)
     }
   }

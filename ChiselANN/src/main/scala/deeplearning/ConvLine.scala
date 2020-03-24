@@ -25,11 +25,7 @@ class ConvLine(
   })
 
   //权重存到ROM中
-  val weight_rom: Vec[Vec[Vec[SInt]]] = Vec(filterBatch,Vec(filterWidth,Vec(filterBatch,dtype)))
-  for(f <- 0 until filterBatch)
-    for(w <- 0 until filterWidth)
-      for(h <- 0 until filterHeight)
-        weight_rom(f)(w)(h) := weights(f)(w)(h)
+  val weight_rom = VecInit(weights.flatten.flatten)
   val bias_rom = VecInit(bias)
 
   val conv_neurons : Seq[Seq[Neuron]]= (0 until filterBatch).map(f =>{
@@ -39,9 +35,9 @@ class ConvLine(
       val baseW : Int = j * strideWidth
       for(w <- 0 until filterWidth)
         for( h <- 0 until filterHeight){
-          val ioIndex = baseW + w + outputWidth * h
+          val ioIndex = baseW + w + dataWidth * h
           neuron.io.in(w + filterWidth * h) := io.dataIn.bits(ioIndex)
-          neuron.io.weights(w + filterWidth * h) := weight_rom(f)(w)(h)
+          neuron.io.weights(w + filterWidth * h) := weight_rom(f*filterWidth*filterHeight + h*filterWidth + w)
         }
       io.dataOut.bits(f)(j) := neuron.io.act
       neuron

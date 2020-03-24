@@ -27,8 +27,10 @@ class ConvLayer(
   val io = IO(new Bundle{
     val dataIn = Flipped(Decoupled(Vec(inputNo, dtype)))
     val dataOut = Decoupled(Vec(outputNo,dtype))
+    //for debug
+    val conv_buffer = Output(Vec(filterHeight*dataWidth,dtype))
+    val conv_buffer_valid = Output(Bool())
     val conv_line = Output(Vec(filterBatch,Vec(outputWidth,dtype)))
-    val result_addr = Output(UInt(log2Ceil(outputHeight).W))
     val conv_line_valid = Output(Bool())
   })
 
@@ -48,41 +50,24 @@ class ConvLayer(
     frac_bits = frac_bits
   ))
 
+  val conv_output = Module(new ConvBufferOutput(
+    dtype = dtype,
+    width = outputWidth,
+    height = outputHeight,
+    batch = filterBatch
+  ))
+
   conv_buffer.io.dataIn <> io.dataIn
   conv_line.io.dataIn <> conv_buffer.io.dataOut
-
-  // Mem保存结果
-  val result_buffer = Mem(outputHeight,Vec(filterBatch,Vec(outputWidth,dtype)))
-
-  //valid 写入结果
-  val result_addr = RegInit(0.U(log2Ceil(outputHeight).W))
-  val is_full: Bool = result_addr === (outputHeight).asUInt(log2Ceil(outputHeight).W)
-
-  withClock(clock){
-    when(conv_line.io.dataOut.valid){
-      result_buffer.write(result_addr,conv_line.io.dataOut.bits)
-    }
-    when(RegNext(conv_line.io.dataOut.valid)){
-      result_addr := result_addr + 1.U(log2Ceil(outputHeight).W)
-    }
-    when(is_full){
-      result_addr := 0.U(log2Ceil(outputHeight).W)
-    }
-  }
-  //for debug
-  io.conv_line := conv_line.io.dataOut.bits
-  io.result_addr := result_addr
-  io.conv_line_valid := conv_line.io.dataOut.valid
-  //结果接入到输出
-  for(h <- 0 until outputHeight)
-    for(w <- 0 until outputWidth)
-      for(f <- 0 until filterBatch){
-        val outputIndex: Int = f * outputWidth * outputHeight + w + outputWidth * h
-        io.dataOut.bits(outputIndex) := result_buffer(h)(f)(w)
-      }
+  conv_output.io.dataIn <> conv_line.io.dataOut
+  io.dataOut <> conv_output.io.dataOut
 
   val latency : Int = outputHeight * conv_buffer.latency + conv_line.latency
-  io.dataOut.valid := is_full
   io.dataIn.ready := true.B
-  conv_line.io.dataOut.ready := io.dataOut.ready
+
+  //debug
+  io.conv_buffer_valid := conv_buffer.io.dataOut.valid
+  io.conv_buffer := conv_buffer.io.dataOut.bits
+  io.conv_line_valid := conv_line.io.dataOut.valid
+  io.conv_line := conv_line.io.dataOut.bits
 }

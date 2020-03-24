@@ -14,11 +14,12 @@ object GetInputSuit extends App {
                      img : Option[Seq[Seq[SInt]]]
                    ) extends Module{
 
-    val io = IO(new Bundle() {
-      val write = Input(Bool())
-      val write_addr = Input(UInt(log2Ceil(dataHeight).W))
-      val write_data = Input(Vec(dataWidth,dtype))
-      val dataReady = Input(Bool())
+    val io = IO(new Bundle(){
+      val inputBundle = new InputBundle(
+        dtype = dtype,
+        dataWidth = dataWidth,
+        dataHeight = dataHeight
+      )
       val output = Decoupled(Vec(filterHeight*dataWidth,dtype))
       val mem_output = Output(Vec(dataWidth,dtype))
     })
@@ -31,10 +32,7 @@ object GetInputSuit extends App {
       img = img,
     ))
 
-    getInputImg.io.inputBundle.write := io.write
-    getInputImg.io.inputBundle.write_addr := io.write_addr
-    getInputImg.io.inputBundle.write_data := io.write_data
-    getInputImg.io.inputBundle.dataReady := io.dataReady
+    getInputImg.io.inputBundle <> io.inputBundle
     io.mem_output := getInputImg.io.dataOut.bits
 
     val convBufferLine = Module(new ConvBufferLine(dtype,filterHeight,dataWidth))
@@ -44,7 +42,7 @@ object GetInputSuit extends App {
 
   class InputTester(c : InputBuffer) extends PeekPokeTester(c){
     //write to mem
-    poke(c.io.dataReady , false.B)
+    poke(c.io.inputBundle.dataReady , false.B)
     for(j <- 0 until 28){
       val line = (0 until 5).map( k => {
         val a = j*10 + k
@@ -52,15 +50,15 @@ object GetInputSuit extends App {
       }).toList
 
       for( k <- line.indices){
-        poke(c.io.write_data(k),line(k))
+        poke(c.io.inputBundle.write_data(k),line(k))
       }
-      poke(c.io.write_addr,j.asUInt(5.W))
-      poke(c.io.write,true.B)
+      poke(c.io.inputBundle.write_addr,j.asUInt(5.W))
+      poke(c.io.inputBundle.write,true.B)
       step(1)
-      poke(c.io.write,false.B)
+      poke(c.io.inputBundle.write,false.B)
     }
 
-    poke(c.io.dataReady , true.B)
+    poke(c.io.inputBundle.dataReady , true.B)
     for( i <- 0 until 200){
       step(1)
       if(peek(c.io.output.valid) == 1){
@@ -115,7 +113,7 @@ object GetInputSuit extends App {
 
   class InputInitTester(c : InputBuffer,img:Seq[Seq[SInt]]) extends PeekPokeTester(c){
     var k = -1
-    poke(c.io.dataReady , true.B)
+    poke(c.io.inputBundle.dataReady , true.B)
     for( i <- 0 until 120){
       step(1)
       if(peek(c.io.output.valid) == 1){
