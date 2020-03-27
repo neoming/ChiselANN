@@ -13,7 +13,7 @@ class ConvBufferOutput(
 
 
   val addr_width: Int = log2Ceil(height) + 1
-  val mem = Mem(height,Vec(batch,Vec(width,dtype)))
+  val mem = Reg(Vec(height,Vec(batch,Vec(width,dtype))))
   val addr = RegInit(0.U(addr_width.W))
 
   val io = IO(new Bundle() {
@@ -25,7 +25,7 @@ class ConvBufferOutput(
   val addr_inc = RegNext(io.dataIn.valid)
 
   when(io.dataIn.valid){
-    mem.write(addr,io.dataIn.bits)
+    mem(addr) := io.dataIn.bits
     addr := addr + 1.U
   }
 

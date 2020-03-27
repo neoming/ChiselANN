@@ -8,7 +8,6 @@ import chisel3.iotesters.{Driver, PeekPokeTester}
 object ConvLayerSuit extends App {
   class ConvLayerWithInput(
    dtype : SInt,
-   img : Option[Seq[Seq[SInt]]],
    conv_bias : Seq[SInt],
    conv_weights :  Seq[Seq[Seq[SInt]]],
    frac_bits: Int = 0,
@@ -43,7 +42,6 @@ object ConvLayerSuit extends App {
       dataWidth = dataWidth,
       dataHeight = dataWidth,
       filterHeight = filterHeight,
-      img = img,
     ))
 
     val convLayer = Module(new ConvLayer(
@@ -57,7 +55,8 @@ object ConvLayerSuit extends App {
       filterBatch = filterBatch,
       strideHeight = strideHeight,
       strideWidth = strideWidth,
-      frac_bits = frac_bits
+      frac_bits = frac_bits,
+      debug = true,
     ))
 
     getInputImg.io.inputBundle <> io.inputBundle
@@ -66,18 +65,32 @@ object ConvLayerSuit extends App {
 
     val latency : Int = convLayer.latency
     //for debug
-    io.conv_line := convLayer.io.conv_line
-    io.conv_line_valid := convLayer.io.conv_line_valid
-    io.conv_buffer_valid := convLayer.io.conv_buffer_valid
-    io.conv_buffer := convLayer.io.conv_buffer
+    io.conv_line := convLayer.io.conv_line.get
+    io.conv_line_valid := convLayer.io.conv_line_valid.get
+    io.conv_buffer_valid := convLayer.io.conv_buffer_valid.get
+    io.conv_buffer := convLayer.io.conv_buffer.get
   }
 
   class ConvLayerTester(
    c:ConvLayerWithInput,
    rfname:String,
    dtype:SInt,
+   img : Seq[Seq[SInt]]
   ) extends PeekPokeTester(c){
-
+    //write img to mem
+    poke(c.io.inputBundle.write,false.B)
+    poke(c.io.inputBundle.dataReady,false.B)
+    for(i <- img.indices){
+      for(j <- img.head.indices){
+        poke(c.io.inputBundle.write_data(j),img(i)(j))
+      }
+      poke(c.io.inputBundle.write_addr,i.asUInt(log2Ceil(img.size).W))
+      poke(c.io.inputBundle.write,true.B)
+      step(1)
+      poke(c.io.inputBundle.write,false.B)
+    }
+    step(1)
+    //start conv
     poke(c.io.inputBundle.dataReady,true.B)
     print(" the valid signal is :" + peek(c.io.dataOut.valid) + '\n')
     var i = 0
@@ -114,12 +127,11 @@ object ConvLayerSuit extends App {
     val img = TestTools.getTwoDimArryAsSIntWithOutTrans(fname = ifname,dtype = dtype,frac = frac_bits)
     Driver(() => new ConvLayerWithInput(
       dtype = dtype,
-      img = Some(img),
       conv_weights = weights,
       conv_bias = bias,
       frac_bits = frac_bits
     )){
-      c => new ConvLayerTester(c,rfname,dtype)
+      c => new ConvLayerTester(c,rfname,dtype,img)
     }
   }
 

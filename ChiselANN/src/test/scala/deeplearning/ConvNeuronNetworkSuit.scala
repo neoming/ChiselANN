@@ -1,13 +1,9 @@
 
 package deeplearning
 
-import java.io.File
-
 import chisel3._
 import chisel3.iotesters.{Driver, PeekPokeTester}
 import chisel3.util.log2Ceil
-import com.github.tototoshi.csv.CSVWriter
-import deeplearning.TestTools.src_path
 
 object ConvNeuronNetworkSuit extends App {
   class CNNTester(

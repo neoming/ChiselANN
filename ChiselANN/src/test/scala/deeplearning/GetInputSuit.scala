@@ -11,7 +11,6 @@ object GetInputSuit extends App {
                      dataWidth : Int,
                      dataHeight : Int,
                      filterHeight : Int,
-                     img : Option[Seq[Seq[SInt]]]
                    ) extends Module{
 
     val io = IO(new Bundle(){
@@ -29,7 +28,6 @@ object GetInputSuit extends App {
       dataWidth = dataWidth,
       dataHeight = dataHeight,
       filterHeight = filterHeight,
-      img = img,
     ))
 
     getInputImg.io.inputBundle <> io.inputBundle
@@ -40,78 +38,20 @@ object GetInputSuit extends App {
     io.output <> convBufferLine.io.dataOut
   }
 
-  class InputTester(c : InputBuffer) extends PeekPokeTester(c){
+  class InputBufferTester(c : InputBuffer,img:Seq[Seq[SInt]]) extends PeekPokeTester(c){
     //write to mem
     poke(c.io.inputBundle.dataReady , false.B)
-    for(j <- 0 until 28){
-      val line = (0 until 5).map( k => {
-        val a = j*10 + k
-        a.asSInt(16.W)
-      }).toList
-
-      for( k <- line.indices){
-        poke(c.io.inputBundle.write_data(k),line(k))
-      }
-      poke(c.io.inputBundle.write_addr,j.asUInt(5.W))
-      poke(c.io.inputBundle.write,true.B)
-      step(1)
-      poke(c.io.inputBundle.write,false.B)
-    }
-
-    poke(c.io.inputBundle.dataReady , true.B)
-    for( i <- 0 until 200){
-      step(1)
-      if(peek(c.io.output.valid) == 1){
-        println("output.valid: " + peek(c.io.output.valid))
-        //println("output.ready: " + peek(c.io.output.ready))
-        println("output.bits: " + peek(c.io.output.bits))
-        println("mem_output.bits: " + peek(c.io.mem_output))
-      }
-    }
-  }
-
-  def runInputBuffer():Unit = {
-    Driver(() => new InputBuffer(SInt(16.W), 5, 28, 5,None))(c => new InputTester(c))
-  }
-
-  class GetInputImgTester(c : GetInputImg) extends PeekPokeTester(c){
     poke(c.io.inputBundle.write,false.B)
-    poke(c.io.dataOut.ready,true.B)
-    for(j <- 0 until 20){
-      val line = (0 until 10).map( k => {
-        val a = j + k
-        a.asSInt(16.W)
-      }).toList
-      for( k <- line.indices){
-        poke(c.io.inputBundle.write_data(k),line(k))
+    for(i <- img.indices){
+      for( j <- img(i).indices){
+        poke(c.io.inputBundle.write_data(j),img(i)(j))
       }
-      poke(c.io.inputBundle.write_addr,j)
+      poke(c.io.inputBundle.write_addr,i.asUInt(log2Ceil(img.size).W))
       poke(c.io.inputBundle.write,true.B)
       step(1)
       poke(c.io.inputBundle.write,false.B)
     }
-    poke(c.io.inputBundle.dataReady,true.B)
-    for(i <- 0 until 200){
-      //println("read_addr: " + peek(c.io.read_addr(0)) + " addr: " + peek(c.io.read_addr(1)) + " base_addr: " + peek(c.io.read_addr(2)))
-      step(1)
-    }
-  }
 
-  def runGetInputImg():Unit = {
-    Driver(() => new GetInputImg(SInt(16.W),10,20,5,None)){
-      c => new GetInputImgTester(c)
-    }
-  }
-
-  //test mem init with img
-  def getOutput(img:Seq[Seq[SInt]],baseIndex:Int,height:Int) : Seq[SInt] = {
-    val result = (0 until height).map(i =>{
-      img(i + baseIndex)
-    }).toList.flatten
-    result
-  }
-
-  class InputInitTester(c : InputBuffer,img:Seq[Seq[SInt]]) extends PeekPokeTester(c){
     var k = -1
     poke(c.io.inputBundle.dataReady , true.B)
     for( i <- 0 until 120){
@@ -128,14 +68,21 @@ object GetInputSuit extends App {
     }
   }
 
+  //test mem init with img
+  def getOutput(img:Seq[Seq[SInt]],baseIndex:Int,height:Int) : Seq[SInt] = {
+    val result = (0 until height).map(i =>{
+      img(i + baseIndex)
+    }).toList.flatten
+    result
+  }
+
   def runInputBufferInit():Unit = {
     val input = "test_cnn/input_2d_7.csv"
     val img = TestTools.getTwoDimArryAsSIntWithOutTrans(input,SInt(16.W),4)
-    Driver(() => new InputBuffer(SInt(16.W),28,28,5,Some(img))){
-      c => new InputInitTester(c,img)
+    Driver(() => new InputBuffer(SInt(16.W),28,28,5)){
+      c => new InputBufferTester(c,img)
     }
   }
-  //runGetInputImg()
-  //runInputBuffer()
+
   runInputBufferInit()
 }

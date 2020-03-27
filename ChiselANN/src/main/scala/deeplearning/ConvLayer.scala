@@ -16,6 +16,7 @@ class ConvLayer(
                strideWidth : Int = 1,
                strideHeight : Int = 1,
                frac_bits : Int = 0,
+               debug : Boolean = true,
                ) extends  Module{
 
   val inputNo: Int = dataWidth
@@ -28,10 +29,10 @@ class ConvLayer(
     val dataIn = Flipped(Decoupled(Vec(inputNo, dtype)))
     val dataOut = Decoupled(Vec(outputNo,dtype))
     //for debug
-    val conv_buffer = Output(Vec(filterHeight*dataWidth,dtype))
-    val conv_buffer_valid = Output(Bool())
-    val conv_line = Output(Vec(filterBatch,Vec(outputWidth,dtype)))
-    val conv_line_valid = Output(Bool())
+    val conv_buffer = if(debug)Some(Output(Vec(filterHeight*dataWidth,dtype))) else None
+    val conv_buffer_valid = if(debug)Some(Output(Bool())) else None
+    val conv_line = if(debug)Some(Output(Vec(filterBatch,Vec(outputWidth,dtype)))) else None
+    val conv_line_valid = if(debug)Some( Output(Bool())) else None
   })
 
 
@@ -65,9 +66,11 @@ class ConvLayer(
   val latency : Int = outputHeight * conv_buffer.latency + conv_line.latency
   io.dataIn.ready := true.B
 
-  //debug
-  io.conv_buffer_valid := conv_buffer.io.dataOut.valid
-  io.conv_buffer := conv_buffer.io.dataOut.bits
-  io.conv_line_valid := conv_line.io.dataOut.valid
-  io.conv_line := conv_line.io.dataOut.bits
+  if(debug){
+    //debug
+    io.conv_buffer_valid.get := conv_buffer.io.dataOut.valid
+    io.conv_buffer.get := conv_buffer.io.dataOut.bits
+    io.conv_line_valid.get := conv_line.io.dataOut.valid
+    io.conv_line.get := conv_line.io.dataOut.bits
+  }
 }

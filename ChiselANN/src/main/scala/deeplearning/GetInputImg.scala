@@ -8,7 +8,6 @@ class GetInputImg(
                  dataWidth : Int,
                  dataHeight : Int,
                  filterHeight : Int,
-                 img : Option[Seq[Seq[SInt]]],
                  )extends Module{
   val io = IO(new Bundle() {
 
@@ -22,7 +21,7 @@ class GetInputImg(
     val dataOut = Decoupled(Vec(dataWidth, dtype))
   })
 
-  val imgMem = Module(new ImgMem(dtype,dataHeight,dataWidth,img))
+  val imgMem = Module(new ImgMem(dtype,dataHeight,dataWidth))
 
   val addr_width = log2Ceil(dataHeight)
   val base_addr = RegInit(0.U(addr_width.W))
